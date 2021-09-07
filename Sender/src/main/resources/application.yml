@@ -1,5 +1,6 @@
 server:
   port: 8080
+
 ---
 
 spring:
@@ -24,7 +25,7 @@ spring:
                   serde: org.apache.kafka.common.serialization.Serdes$StringSerde
       bindings:
         event-in:
-          group: Order
+          group: Sender
           destination: sharedmobility
           contentType: application/json
         event-out:
@@ -36,17 +37,7 @@ logging:
     org.hibernate.type: trace
     org.springframework.cloud: debug
 server:
-  port: 8081
-api: 
-  url: 
-    order: localhost:8083
-#feign:
-#  hystrix:
-#    enabled: true
-#hystrix:
-#  command:
-#    default:
-#      execution.isolation.thread.timeoutInMilliseconds: 610    
+  port: 8086
 ---
 
 spring:
@@ -66,20 +57,9 @@ spring:
                   serde: org.apache.kafka.common.serialization.Serdes$StringSerde
       bindings:
         event-in:
-          group: Order
+          group: Sender
           destination: sharedmobility
           contentType: application/json
         event-out:
           destination: sharedmobility
           contentType: application/json
-api: 
-  url: 
-    order: ${order-url}          
-
-# feign:
-#   hystrix:
-#     enabled: true
-# hystrix:
-#   command:
-#     default:
-#       execution.isolation.thread.timeoutInMilliseconds: 610

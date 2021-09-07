@@ -215,6 +215,9 @@
 
   cd gateway
   mvn spring-boot:run
+
+  cd sender
+  mvn spring-boot:run
 ```
 
 ## 게이트웨이 적용
@@ -231,19 +234,23 @@ spring:
         - id: Stock
           uri: http://localhost:8082
           predicates:
-            - Path=/stock/** 
+            - Path=/stock/**      
         - id: Payment
           uri: http://localhost:8083
           predicates:
             - Path=/payment/** 
-        - id: Dashboard
+        - id: dashboard
           uri: http://localhost:8084
           predicates:
-            - Path= /dashboard/**
-        - id: Rent
+            - Path= /dashboards/**
+        - id: rent
           uri: http://localhost:8085
           predicates:
             - Path=/rent/** 
+        - id: sender
+          uri: http://localhost:8086
+          predicates:
+            - Path=/sender/**                    
       globalcors:
         corsConfigurations:
           '[/**]':
@@ -278,11 +285,15 @@ spring:
         - id: dashboard
           uri: http://dashboard:8080
           predicates:
-            - Path= /dashboard/**
+            - Path= /dashboards/**
         - id: rent
           uri: http://rent:8080
           predicates:
             - Path=/rent/** 
+        - id: sender
+          uri: http://sender:8080
+          predicates:
+            - Path=/sender/**                      
       globalcors:
         corsConfigurations:
           '[/**]':

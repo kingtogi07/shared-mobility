@@ -15,19 +15,23 @@ spring:
         - id: Stock
           uri: http://localhost:8082
           predicates:
-            - Path=/stock/** 
+            - Path=/stock/**      
         - id: Payment
           uri: http://localhost:8083
           predicates:
             - Path=/payment/** 
-        - id: Dashboard
+        - id: dashboard
           uri: http://localhost:8084
           predicates:
             - Path= /dashboards/**
-        - id: Rent
+        - id: rent
           uri: http://localhost:8085
           predicates:
             - Path=/rent/** 
+        - id: sender
+          uri: http://localhost:8086
+          predicates:
+            - Path=/sender/**                    
       globalcors:
         corsConfigurations:
           '[/**]':
@@ -67,6 +71,10 @@ spring:
           uri: http://rent:8080
           predicates:
             - Path=/rent/** 
+        - id: sender
+          uri: http://sender:8080
+          predicates:
+            - Path=/sender/**                      
       globalcors:
         corsConfigurations:
           '[/**]':
