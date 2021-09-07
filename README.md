@@ -122,24 +122,24 @@
 
 
 ### 이벤트 도출
-![image](https://user-images.githubusercontent.com/31404198/125080856-48a5b100-e100-11eb-90d4-a738c74118ff.png)
+![image](https://user-images.githubusercontent.com/30138356/132278885-21b80f61-1acf-4dbf-b1fa-baf4750ee152.PNG)
 
 ### 부적격 이벤트 탈락
-![image](https://user-images.githubusercontent.com/31404198/125080894-53f8dc80-e100-11eb-8fc8-fe760889d6ea.png)
+![image](https://user-images.githubusercontent.com/30138356/132279000-ca1a4e60-c83a-4854-ba8a-c63834683e47.PNG)
 
     - 과정중 도출된 잘못된 도메인 이벤트들을 걸러내는 작업을 수행함
 
 ### 액터, 커맨드 부착하여 읽기 좋게
-![image](https://user-images.githubusercontent.com/31404198/125081045-830f4e00-e100-11eb-810c-f3d93b810b54.png)
+![image](https://user-images.githubusercontent.com/30138356/132279314-a88ec597-14f3-4ac6-aa7c-b197a194159a.PNG)
 
 ### 어그리게잇으로 묶기
-![image](https://user-images.githubusercontent.com/31404198/125081386-e8633f00-e100-11eb-8b8a-f8383379072a.png)
+![image](https://user-images.githubusercontent.com/30138356/132279320-a994d99c-cf2c-483a-9764-46c3963fd6ec.PNG)
 
     - 예약, 대여처리, 결제정보, 재고는 그와 연결된 command 와 event 들에 의하여 트랜잭션이 유지되어야 하는 단위로 그들 끼리 묶어줌
 
 ### 바운디드 컨텍스트로 묶기
 
-![image](https://user-images.githubusercontent.com/31404198/125081538-16488380-e101-11eb-9f30-d8688c5d965c.png)
+![image](https://user-images.githubusercontent.com/30138356/132279332-1318d543-7bff-48af-a2a7-394e095232cc.PNG)
 
     - 도메인 서열 분리 
         - Core Domain:  예약(front), 대여 : 없어서는 안될 핵심 서비스이며, 연견 Up-time SLA 수준을 99.999% 목표, 배포주기는 예약의 경우 1주일 1회 미만, 대여의 경우 1개월 1회 미만
@@ -148,33 +148,33 @@
 
 ### 폴리시 부착 (괄호는 수행주체, 폴리시 부착을 둘째단계에서 해놔도 상관 없음. 전체 연계가 초기에 드러남)
 
-![image](https://user-images.githubusercontent.com/31404198/125081926-8a832700-e101-11eb-8f7d-7a32cd4189ab.png)
+![image](https://user-images.githubusercontent.com/30138356/132279347-36b5ac95-ffc7-4e05-b172-8e0e04fabe3c.PNG)
 
 ### 폴리시의 이동과 컨텍스트 매핑 (점선은 Pub/Sub, 실선은 Req/Resp)
 
-![image](https://user-images.githubusercontent.com/31404198/125081998-9ec72400-e101-11eb-942f-a5beec455466.png)
+![image](https://user-images.githubusercontent.com/30138356/132279364-889d41f4-0354-4e2e-a97d-b4738bb66bcc.PNG)
 
 ### 완성된 1차 모형
 
-![image](https://user-images.githubusercontent.com/31404198/125188470-e4552f80-e26e-11eb-9a3a-c6784c62287b.png)
+![image](https://user-images.githubusercontent.com/30138356/132279371-14fab015-10a4-485f-9711-684a7855dae2.PNG)
 
     - View Model 추가
 
 ### 1차 완성본에 대한 기능적/비기능적 요구사항을 커버하는지 검증
 
-![image](https://user-images.githubusercontent.com/31404198/125188546-267e7100-e26f-11eb-9cd8-674365a4e5ce.png)
+![image](https://user-images.githubusercontent.com/30138356/132279384-29ab955b-b06c-45b4-9544-cf2cac7bd0e8.PNG)
 
     - 사용자가 킥보드 선택 후 예약한다. (ok)
     - 예약한 킥보드에 대해서 결제한다. (ok)
     - 결제 후 사용승인이 되면 킥보드를 대여한다. (ok)
     - 킥보드가 대여가 되면 재고가 감소된다. (ok)
 
-![image](https://user-images.githubusercontent.com/31404198/125188569-35652380-e26f-11eb-9d41-cd6e23a87959.png)
+![image](https://user-images.githubusercontent.com/30138356/132279391-39f600c6-124c-4bfe-bd31-37b7d10e524c.PNG)
 
     - 사용자가 킥보드 예약을 취소한다. (ok)
     - 예약을 취소하면 결제가 취소된다. (ok)
 
-![image](https://user-images.githubusercontent.com/31404198/125188594-4150e580-e26f-11eb-823f-865320aaf110.png)
+![image](https://user-images.githubusercontent.com/30138356/132279404-a2755d06-28ac-455d-bfbd-fe5092300591.PNG)
 
     - 사용자가 킥보드를 반납한다. (ok)
     - 반납요청이 확인되면 재고가 증가한다. (ok)
@@ -182,7 +182,7 @@
 
 ### 비기능 요구사항에 대한 검증
 
-![image](https://user-images.githubusercontent.com/31404198/125188612-4ca41100-e26f-11eb-8139-2cb390446974.png)
+![image](https://user-images.githubusercontent.com/30138356/132279412-456fa535-eb57-4064-9eb0-ca12f308bbb6.PNG)
 
     - 마이크로 서비스를 넘나드는 시나리오에 대한 트랜잭션 처리
     - 고객 예약시 결제처리:  결제가 완료되지 않은 예약은 절대 대여를 할 수 없기 때문에, ACID 트랜잭션 적용. 예약완료시 결제처리에 대해서는 Request-Response 방식 처리
@@ -191,7 +191,7 @@
 
 ## 헥사고날 아키텍처 다이어그램 도출
     
-![image](https://user-images.githubusercontent.com/31404198/125391885-218cff00-e3e0-11eb-9663-05a0d58a28d7.png)
+![image](https://user-images.githubusercontent.com/30138356/132279422-474f5e99-5237-4875-95fd-7a57c1f01aa9.PNG)
 
     - Chris Richardson, MSA Patterns 참고하여 Inbound adaptor와 Outbound adaptor를 구분함
     - 호출관계에서 PubSub 과 Req/Resp 를 구분함
