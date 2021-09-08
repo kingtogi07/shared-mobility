@@ -466,8 +466,6 @@ public interface OrderInfoRepository extends PagingAndSortingRepository<OrderInf
 - 알림(sender) 서비스에서는 대여/반납 Event 수신 후, 이벤트 발생 내역을 고객에게 발송한다.
 ```
   # 대여/반납 Event 수신 후, Stock 서비스의 재고 차감 확인 ( 이벤트 발생 내역 이력만 남김 )
-  ```
-```
   # 재고 차감 내역 콘솔에서 확인
 ```
   ![캡처13](https://user-images.githubusercontent.com/30138356/132431703-c5f131bd-af00-49dc-b580-47373f177dec.PNG)
