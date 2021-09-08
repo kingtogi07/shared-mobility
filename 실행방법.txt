@@ -43,10 +43,16 @@ order 디렉토리 밑 PaymetInfoService.java 파일에서 12번째줄 변경
 http POST localhost:8088/order customerId=99 orderId=1 time=3 
 >> 시간*1000원 가격, default time = 0
 
+http POST http://a03ee52aae4554ee9befd9a9327c52b2-261978141.ap-northeast-2.elb.amazonaws.com:8080/order customerId=99 orderId=1 time=3 
+http http://a03ee52aae4554ee9befd9a9327c52b2-261978141.ap-northeast-2.elb.amazonaws.com:8080/order/1
+http http://a03ee52aae4554ee9befd9a9327c52b2-261978141.ap-northeast-2.elb.amazonaws.com:8080/order
+
 2. 사용 신청 내역 확인
 http localhost:8088/order/1	 # USE 상태 확인
 http localhost:8088/payment/1  # PAID 상태 확인
 http localhost:8088/rent/1  # APPROVE 상태 확인
+
+http http://gateway:8080/payment/500
 
 3. 렌트 신청
 http PUT localhost:8088/rent/1
@@ -130,6 +136,10 @@ LiveNess- Probe :
 1. 운영
 aws configure 
 
+- Access Key ID 만들기
+    . AWS IAM 접속 > 로그인 자격 증명 > 액세스 키 만들기
+    . ap-northeast-2
+
 # 아래 세문단 차례로 입력
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
@@ -189,10 +199,22 @@ IAM
 eksctl create cluster --name [user01-eks] --version 1.16 --nodegroup-name standard-workers --node-type t3.medium --nodes 3 --nodes-min 1 --nodes-max 4
 
 # eks cluster 설정
-aws eks --region [ap-northeast-1] update-kubeconfig --name [user01-eks]
+aws eks --region ap-northeast-2 update-kubeconfig --name user01-eks-new
 
 # eks 설정 내역 확인
 kubectl config current-context
+
+# ecr 생성 ( aws 이미지 레파지토리 )
+aws ecr create-repository --repository-name user01-ecr --image-scanning-configuration scanOnPush=true --region ap-northeast-2
+
+# AWS 컨테이너 레지스트리 로그인
+aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 879772956301.dkr.ecr.ap-northeast-2.amazonaws.com/user01-ecr
+    >> 오류(unknown flag: --password-stdin) 발생 시, 
+    docker login --username AWS -p $(aws ecr get-login-password --region ap-northeast-2) 879772956301.dkr.ecr.ap-northeast-2.amazonaws.com/user01-ecr
+
+# Docker 이미지 푸쉬하기
+aws ecr create-repository --repository-name user01-order --region ap-northeast-2
+docker push 879772956301.dkr.ecr.ap-northeast-2.amazonaws.com/user01-ecr
 
 # metric server 설치 ( 오토스케일러 수행 시 필수 )
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml
@@ -214,6 +236,7 @@ helm install my-kafka bitnami/kafka --namespace kafka
 
 # namespace 생성
 kubectl create namespace [sharedmobility]
+kubectl create namespace togi
 
 # image build & push ( 코드 수정 부를 AWS 의 저장소에 업로드 하는 행위, script.sh 참조)
 cd Order
@@ -225,6 +248,32 @@ docker push 879772956301.dkr.ecr.ap-northeast-2.amazonaws.com/user01-order:lates
 cd ..
 kubectl delete -f kubernetes/sharedmobility/order.yml
 kubectl apply -f kubernetes/sharedmobility/order.yml
+
+kubectl delete -f kubernetes/sharedmobility/payment.yml
+kubectl apply -f kubernetes/sharedmobility/payment.yml
+
+kubectl delete -f kubernetes/sharedmobility/sender.yml
+kubectl apply -f kubernetes/sharedmobility/sender.yml
+
+kubectl delete -f kubernetes/sharedmobility/rent.yml
+kubectl apply -f kubernetes/sharedmobility/rent.yml
+kubectl delete -f kubernetes/sharedmobility/stock.yml
+kubectl apply -f kubernetes/sharedmobility/stock.yml
+kubectl delete -f kubernetes/sharedmobility/dashboard.yml
+kubectl apply -f kubernetes/sharedmobility/dashboard.yml
+kubectl delete -f kubernetes/sharedmobility/gateway.yml
+kubectl apply -f kubernetes/sharedmobility/gateway.yml
+kubectl delete -f kubernetes/sharedmobility/sender.yml
+kubectl apply -f kubernetes/sharedmobility/sender.yml
+
+cd ..
+kubectl apply  -f kubernetes/sharedmobility/order.yml
+kubectl apply  -f kubernetes/sharedmobility/payment.yml
+kubectl apply  -f kubernetes/sharedmobility/rent.yml
+kubectl apply  -f kubernetes/sharedmobility/stock.yml
+kubectl apply  -f kubernetes/sharedmobility/dashboard.yml
+kubectl apply  -f kubernetes/sharedmobility/gateway.yml
+kubectl apply  -f kubernetes/sharedmobility/sender.yml
 
 # 상태 확인
 kubectl get pod,deploy,svc,pvc,configmap
@@ -244,3 +293,86 @@ spec:
   selector:
     app: gateway
   type: LoadBalancer
+
+-----------------------------------------------------
+
+
+http POST http://gateway:8080/order orderId=1000 customerId=99
+http http://gateway:8080/payment/500
+
+ [구현]
+  # orderInfo 서비스의 킥보드 사용 신청(주문) 
+  http POST http://gateway:8080/order orderId=1000 customerId=99
+  # 주문 후 결제 상태 확인 ( payStatus = PAID )
+  http http://gateway:8080/payment/1
+  # 주문 후 결제 상태 확인 ( rentStatus = APPROVE )
+  http http://gateway:8080/rent/1000
+  # 렌트 신청 ( rentStatus = APPROVE 상태가 아니면 렌트 불가, 렌트 성공 시, rentStatus = RENT 로 변경 )
+  http PUT http://gateway:8080/rent/1000
+
+  [반납]
+    1. 사용 신청
+    http POST http://gateway:8080/order customerId=99  orderId=4000
+    2. 렌트 신청
+    http PUT http://gateway:8080/rent/4000 
+    3. 반납 신청
+    http PUT http://gateway:8080/order/return/4000 
+
+    http http://gateway:8080/order/4000
+    http http://gateway:8080/rent/4000
+
+ [동기식 호출]
+ # 결제 모듈 종료
+ kubectl delete -f kubernetes/sharedmobility/payment.yml
+ # 오더 주문 넣기
+ http POST http://gateway:8080/order customerId=99  orderId=5000
+  # 결제 모듈 살리기
+ kubectl apply -f kubernetes/sharedmobility/payment.yml
+  # 오더 주문 넣기
+ http POST http://gateway:8080/order customerId=99  orderId=5000
+
+ [비동기식 호출]
+  # 대여 모듈 종료
+ kubectl delete -f kubernetes/sharedmobility/rent.yml
+  # 오더 주문 넣기
+ http POST http://gateway:8080/order customerId=99  orderId=10
+  # 대여 모듈 살리기
+ kubectl apply -f kubernetes/sharedmobility/rent.yml
+  # 대여 상태 확인
+  http http://gateway:8080/rent/10
+
+  [CQRS]
+  # 대시보드 확인
+http http://gateway:8080/dashboard/10
+
+  [무정지 재배포]
+  # order.yml 수정
+
+  # 모듈을 내리지 않고도 배포 가능하도록 설정
+  kubectl apply -f kubernetes/sharedmobility/order.yml
+  # 시즈 부하 테스트
+  siege -c2 -t10 -v --content-type "application/json" 'http://gateway:8080/order POST {"orderId" : 1, "customerId": 1}'
+
+  1. 부하 테스트
+    0) 오토 스케일링 설정
+        kubectl autoscale deployment order --cpu-percent=50 --min=1 --max=10
+        # 오토 스케일링 확인
+            kubectl get horizontalpodautoscaler
+            kubectl get hpa
+        # 오토 스케일링 삭제
+            kubectl delete hpa order
+
+    1) Siege (로더제너레이터)를 설치
+        kubectl create deploy siege --image=ghcr.io/acmexii/siege-nginx:latest
+    2) Siege 컨테이너 내로 접속
+        kubectl exec pod/siege-c54d6bdc7-d9wrt -it -- /bin/bash
+    3) Siege 사용하여 워크로드를 2분간 걸어준다 (동시접속자 100명, 30초간 진행)
+        siege -2 -t30 -v --content-type "application/json" 'http://gateway:8080/order POST {"orderId" : 1, "customerId": 1}'
+
+2. 서킷브레이커
+    1) Order > application.yml 수정
+        # hystrix 적용
+    2) Siege 로 부하        
+        siege -c2 -t10 -v --content-type "application/json" 'http://gateway:8080/order POST {"orderId" : 1, "customerId": 1}'
+        siege -c1 -t10 -v --content-type "application/json" 'http://gateway:8080/payment/'
+
