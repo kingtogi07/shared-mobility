@@ -463,6 +463,15 @@ public interface OrderInfoRepository extends PagingAndSortingRepository<OrderInf
 ```
   ![8](https://user-images.githubusercontent.com/30138356/125185587-a81ad280-e260-11eb-99d6-307c009821ca.PNG)
 
+- 알림(sender) 서비스에서는 대여/반납 Event 수신 후, 이벤트 발생 내역을 고객에게 발송한다.
+```
+  # 대여/반납 Event 수신 후, Stock 서비스의 재고 차감 확인 ( 이벤트 발생 내역 이력만 남김 )
+  ```
+```
+  # 재고 차감 내역 콘솔에서 확인
+```
+  ![캡처13](https://user-images.githubusercontent.com/30138356/132431703-c5f131bd-af00-49dc-b580-47373f177dec.PNG)
+
 ## Correlation-key
 - 사용 반납 작업을 통해, Correlation-key 연결을 검증한다
 
@@ -940,13 +949,6 @@ mvn package
 docker build -t 879772956301.dkr.ecr.ap-northeast-2.amazonaws.com/user01-stock:latest .
 docker push 879772956301.dkr.ecr.ap-northeast-2.amazonaws.com/user01-stock:latest
 
-# sender
-cd ..
-cd Sender
-mvn package
-docker build -t 879772956301.dkr.ecr.ap-northeast-2.amazonaws.com/user01-sender:latest .
-docker push 879772956301.dkr.ecr.ap-northeast-2.amazonaws.com/user01-sender:latest
-
 # dashboard
 cd ..
 cd Dashboard
@@ -969,7 +971,6 @@ kubectl apply  -f kubernetes/sharedmobility/order.yml
 kubectl apply  -f kubernetes/sharedmobility/payment.yml
 kubectl apply  -f kubernetes/sharedmobility/rent.yml
 kubectl apply  -f kubernetes/sharedmobility/stock.yml
-kubectl apply  -f kubernetes/sharedmobility/sender.yml
 kubectl apply  -f kubernetes/sharedmobility/dashboard.yml
 kubectl apply  -f kubernetes/sharedmobility/gateway.yml
 ```

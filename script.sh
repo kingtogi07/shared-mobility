@@ -25,6 +25,13 @@ mvn package
 docker build -t 879772956301.dkr.ecr.ap-northeast-2.amazonaws.com/user01-stock:latest .
 docker push 879772956301.dkr.ecr.ap-northeast-2.amazonaws.com/user01-stock:latest
 
+# sender
+cd ..
+cd Sender
+mvn package
+docker build -t 879772956301.dkr.ecr.ap-northeast-2.amazonaws.com/user01-sender:latest .
+docker push 879772956301.dkr.ecr.ap-northeast-2.amazonaws.com/user01-sender:latest
+
 # dashboard
 cd ..
 cd Dashboard
